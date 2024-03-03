@@ -68,8 +68,7 @@ See if you can improve the performance over GAM or logistic regression from the 
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+svm.model <- svm(SURVIVED ~ FEMALE + DIABETES + TOBACCO, data = gTrain_COVID, type = 'C-classification', kernel = 'radial')
 ```
 
 Your answer:
@@ -114,8 +113,12 @@ Fit support vector regression to the sales price.  How is the prediction compare
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+svm_model <- svm(SalePrice ~ `Lot Area`+Neighborhood+`Year Built`, data = ames_raw_2008)
+
+predictions <- predict(svm_model, newdata = ames_raw_2009)
+
+loss <- calc_loss(predictions, ames_raw_2009$SalePrice)
+print(loss)
 ```
 
 Your answer:
@@ -258,8 +261,8 @@ data(Auto,package = "ISLR2")
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+median_mpg <- median(Auto$mpg)
+Auto$high_mileage <- ifelse(Auto$mpg > median_mpg, 1, 0)
 ```
 
 Your answer:
@@ -275,8 +278,9 @@ Please write your answer in full sentences.
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+set.seed(679)
+tune.model=tune(svm,high_mileage~.,data=Auto,kernel='linear',ranges=list(cost=c(0.001,0.01,0.1,1,10,100,1000)))
+summary(tune.model)
 ```
 
 Your answer:
@@ -291,8 +295,16 @@ Please write your answer in full sentences.
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+radial.tune=tune(svm, high_mileage~., data=Auto, kernel='radial', ranges=list(cost=c(0.1,1,10,100,1000),gamma=c(0.5,1,2,3,4)))
+
+radial.tune$best.parameters
+radial.tune$best.performance
+
+poly.tune = tune(svm, high_mileage~., data=Auto, kernel='polynomial',
+                 ranges=list(cost=c(0.1,1,10,100,1000), degree=c(1,2,3,4,5)))
+
+poly.tune$best.parameters
+poly.tune$best.performance
 ```
 
 Your answer:
@@ -343,8 +355,10 @@ data(OJ,package = "ISLR2")
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+set.seed(123)
+train = sample(seq(1070), 800, replace = FALSE)
+OJ.train = OJ[train, ]
+OJ.test = OJ[-train, ]
 ```
 
 Your answer:
@@ -359,8 +373,8 @@ Please write your answer in full sentences.
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+OJ.svcfit = svm(Purchase~., data = OJ.train, kernel = "linear", cost=0.01)
+summary(OJ.svcfit)
 ```
 
 Your answer:
@@ -376,8 +390,11 @@ Please write your answer in full sentences.
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+OJtrain.pred = predict(OJ.svcfit, OJ.train)
+table(predict=OJtrain.pred, truth=OJ.train$Purchase)
+
+OJtest.pred = predict(OJ.svcfit, OJ.test)
+table(predict=OJtest.pred, truth=OJ.test$Purchase)
 ```
 
 Your answer:
@@ -392,8 +409,9 @@ Please write your answer in full sentences.
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+set.seed(123)
+OJ.tune = tune(svm, Purchase~., data = OJ.train, kernel = "linear", ranges=list(cost=c(0.01,0.1,0.5,1,10)))
+summary(OJ.tune)
 ```
 
 Your answer:
@@ -408,8 +426,11 @@ Please write your answer in full sentences.
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+newOJtrain.pred = predict(OJ.tune$best.model, OJ.train)
+table(predict=newOJtrain.pred, truth=OJ.train$Purchase)
+
+newOJtest.pred = predict(OJ.tune$best.model, OJ.test)
+table(predict=newOJtest.pred, truth=OJ.test$Purchase)
 ```
 
 Your answer:
@@ -425,8 +446,16 @@ Please write your answer in full sentences.
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+set.seed(123)
+OJ.tune.rkernel = tune(svm, Purchase~., data = OJ.train, kernel = "radial", ranges=list(cost=c(0.01,0.1,0.5,1,10)))
+```
+
+```{r}
+OJkernel.train.pred = predict(OJ.tune.rkernel$best.model, OJ.train)
+table(predict=OJkernel.train.pred, truth=OJ.train$Purchase)
+
+OJkernel.test.pred = predict(OJ.tune.rkernel$best.model, OJ.test)
+table(predict=OJkernel.test.pred, truth=OJ.test$Purchase)
 ```
 
 Your answer:
@@ -441,8 +470,16 @@ Please write your answer in full sentences.
 
 Your code:
 ```{r,echo=TRUE}
-#
-#
+OJ.tune.poly2 = tune(svm, Purchase~., data = OJ.train, kernel = "polynomial", 
+                ranges=list(cost=c(0.01,0.1,0.5,1,10)), degree=2)
+```
+
+```{r}
+OJpoly.train.pred = predict(OJ.tune.poly2$best.model, OJ.train)
+table(predict=OJpoly.train.pred, truth=OJ.train$Purchase)
+
+OJpoly.test.pred = predict(OJ.tune.poly2$best.model, OJ.test)
+table(predict=OJpoly.test.pred, truth=OJ.test$Purchase)
 ```
 
 Your answer:
@@ -462,7 +499,7 @@ Your code:
 ```
 
 Your answer:
-
+In my opinion, radial kernel and polynomial kernel give best results.
 ~~~
 Please write your answer in full sentences.
 
